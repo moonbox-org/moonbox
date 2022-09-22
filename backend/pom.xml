@@ -13,6 +13,7 @@
 
     <modules>
         <module>moonbox-api</module>
+        <module>operator-module</module>
     </modules>
 
 
