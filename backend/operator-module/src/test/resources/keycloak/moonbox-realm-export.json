@@ -2319,6 +2319,10 @@
           "value": "password"
         }
       ],
+      "attributes": {
+        "phoneNumber": "1234567890",
+        "phoneNumberVerified": true
+      },
       "realmRoles": [
         "superuser"
       ]
@@ -2336,6 +2340,10 @@
           "value": "password"
         }
       ],
+      "attributes": {
+        "phoneNumber": "1234567890",
+        "phoneNumberVerified": true
+      },
       "realmRoles": [
         "operator:read",
         "operator:write"
