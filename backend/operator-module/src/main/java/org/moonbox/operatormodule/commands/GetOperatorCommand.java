@@ -56,11 +56,11 @@ public class GetOperatorCommand {
         if (operatorId != null) {
             log.info("Searching with operatorId: {}", operatorId);
 
-            operator = keycloakService.getOperatorById(operatorId).getBody();
+            operator = keycloakService.getOperatorById(operatorId);
 
-            OperatorGroupsAndRoles operatorGroupsAndRoles = getOperatorGroupsAndRoles(operatorId);
-            operator.setGroups(operatorGroupsAndRoles.getOperatorGroups().stream().map(GroupRepresentation::getName).toList());
-            operator.setRealmRoles(operatorGroupsAndRoles.getOperatorRoles().stream().map(RoleRepresentation::getName).toList());
+            if (operator == null) {
+                return ResponseEntity.notFound().build();
+            }
 
             return ResponseEntity.ok(operator);
         }

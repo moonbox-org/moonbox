@@ -23,6 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -68,6 +69,7 @@ class OperatorControllerTest {
     @DynamicPropertySource
     static void keycloakTestProperties(DynamicPropertyRegistry registry) {
         registry.add("keycloak.auth-server-url", () -> KEYCLOAK.getAuthServerUrl());
+        registry.add("keycloak.credentials.secret", () -> "testContainerSecret");
     }
 
     static RestTemplate restTemplate = new RestTemplate();
@@ -149,6 +151,81 @@ class OperatorControllerTest {
                 .perform(get("/api/v1/operators/loggedInOperator").header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + operatorAuthToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("operator"));
+    }
+
+    @Test
+    @DisplayName("return operator by operatorId")
+    void testShouldReturnOperatorByOperatorId() throws Exception {
+
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.put("operatorId", Collections.singletonList("1234-5678"));
+
+        mockMvc
+                .perform(get("/api/v1/operators")
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("1234-5678"));
+    }
+
+    @Test
+    @DisplayName("return operator by email")
+    void testShouldReturnOperatorByEmail() throws Exception {
+
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.put("email", Collections.singletonList("superuser@test.com"));
+
+        mockMvc
+                .perform(get("/api/v1/operators")
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("superuser@test.com"));
+
+        queryParams.put("email", Collections.singletonList("operator@test.com"));
+
+        mockMvc
+                .perform(get("/api/v1/operators")
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value("operator@test.com"));
+    }
+
+    @Test
+    @DisplayName("return operator by username")
+    void testShouldReturnOperatorByUsername() throws Exception {
+
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.put("username", Collections.singletonList("superuser"));
+
+        mockMvc
+                .perform(get("/api/v1/operators")
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("superuser"));
+    }
+
+    @Test
+    @DisplayName("return bad request")
+    void testShouldReturnBadRequest() throws Exception {
+        mockMvc
+                .perform(get("/api/v1/operators")
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("return all operators")
+    void testShouldReturnAllOperators() throws Exception {
+        mockMvc
+                .perform(get("/api/v1/operators/list")
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isNotEmpty())
+                .andExpect(jsonPath("$", hasSize(2)));
     }
 
 }

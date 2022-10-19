@@ -3,7 +3,6 @@ package org.moonbox.operatormodule.services;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.adapters.springsecurity.client.KeycloakRestTemplate;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -12,18 +11,19 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.moonbox.operatormodule.models.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 
-import java.util.Arrays;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ServerErrorException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Service
@@ -35,18 +35,13 @@ public class KeycloakService {
 
     @Value("${keycloak.realm}")
     private String realm;
+    @Value("keycloak.credentials.secret")
+    private String clientSecret;
     @Value("${keycloak.auth-server-url}")
     private String keycloakUrl;
 
     @Autowired
-    private KeycloakRestTemplate restTemplate;
-
-    @Autowired
-    private Keycloak keycloakAdminClient;
-
-    private static final String KC_USERS_ENDPOINT = "/admin/realms/moonbox/users";
-    private static final String KC_GROUPS_ENDPOINT = "/admin/realms/moonbox/groups";
-    private static final String KC_ROLES_ENDPOINT = "/admin/realms/moonbox/roles";
+    private Keycloak keycloakRestTemplate;
 
 
     /* ----- METHODS ----- */
@@ -72,102 +67,191 @@ public class KeycloakService {
     }
 
     public List<UserRepresentation> getOperators() {
-        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        queryParams.put("briefRepresentation", Collections.singletonList("false"));
-        try {
-            log.info("Fetching all realm operators");
-            return Arrays.stream(Objects.requireNonNull(restTemplate.getForEntity(keycloakUrl + KC_USERS_ENDPOINT, UserRepresentation[].class, queryParams).getBody())).toList();
-        } catch (Exception e) {
-            log.info("An error occurred trying to fetch all operators");
-            log.error(e.getMessage());
-            return Collections.emptyList();
-        }
-    }
+        log.info("Fetching all realm operators");
 
-    public ResponseEntity<UserRepresentation> getOperatorById(String operatorId) {
+        List<UserRepresentation> operators;
+
         try {
-            log.info("Searching for operator with ID: {}", operatorId);
-            return restTemplate.getForEntity(keycloakUrl + KC_USERS_ENDPOINT + "/" + operatorId, UserRepresentation.class);
-        } catch (Exception e) {
-            if (e.getMessage().contains("404 Not Found")) {
-                log.info("No operator found for operator ID: {}", operatorId);
-                return ResponseEntity.notFound().build();
+            operators = keycloakRestTemplate
+                    .realm(realm)
+                    .users()
+                    .list();
+        } catch (NotFoundException e) {
+            if (e.getMessage().contains("404")) {
+                log.info("No operators found in database");
+                return Collections.emptyList();
             } else {
-                log.info("An error occurred trying to fetch operator with ID: {}", operatorId);
-                return ResponseEntity.internalServerError().build();
+                log.info("An error occurred trying to fetch all operators: {}", e.getMessage());
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
             }
         }
+        return operators;
+    }
+
+    public UserRepresentation getOperatorById(String operatorId) {
+
+        UserRepresentation operator;
+        List<RoleRepresentation> groupRealmRoleRepresentations = new ArrayList<>();
+
+        try {
+            operator = keycloakRestTemplate
+                    .realm("moonbox")
+                    .users()
+                    .get(operatorId).toRepresentation();
+        } catch (Exception e) {
+            if (e.getMessage().contains("404 Not Found")) {
+                log.info("No operator found for operatorId: {}", operatorId);
+                return null;
+            } else {
+                log.error("An error occurred trying to fetch operator with operatorId: {}", operatorId);
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+            }
+        }
+
+        List<GroupRepresentation> operatorGroupRepresentations = keycloakRestTemplate
+                .realm(realm)
+                .users()
+                .get(operatorId)
+                .groups();
+
+        if (!operatorGroupRepresentations.isEmpty()) {
+            operatorGroupRepresentations.forEach(g -> {
+                groupRealmRoleRepresentations.addAll(keycloakRestTemplate
+                        .realm(realm)
+                        .groups()
+                        .group(g.getId())
+                        .roles()
+                        .realmLevel()
+                        .listAll());
+            });
+        }
+        operator.setGroups(operatorGroupRepresentations.isEmpty() ? Collections.emptyList() : operatorGroupRepresentations.stream().map(GroupRepresentation::getName).toList());
+        operator.setRealmRoles(groupRealmRoleRepresentations.isEmpty() ? Collections.emptyList() : groupRealmRoleRepresentations.stream().map(RoleRepresentation::getName).toList());
+        return operator;
     }
 
     public List<UserRepresentation> getOperatorByUsername(String username) {
-        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        queryParams.put("exact", Collections.singletonList("true"));
-        queryParams.put("username", Collections.singletonList(username));
-        queryParams.put("briefRepresentation", Collections.singletonList("false"));
+
+        List<UserRepresentation> searchResult = Collections.emptyList();
+
         try {
-            log.info("Searching for operator with username: {}", username);
-            return Arrays.stream(Objects.requireNonNull(restTemplate.getForEntity(keycloakUrl + KC_USERS_ENDPOINT, UserRepresentation[].class, queryParams).getBody())).toList();
+            searchResult = keycloakRestTemplate
+                    .realm(realm)
+                    .users()
+                    .search(username, true);
         } catch (Exception e) {
-            log.info("An error occurred trying to fetch operator with username: {}", username);
-            log.error(e.getMessage());
-            return Collections.emptyList();
+            if (e.getMessage().contains("404")) {
+                log.info("No operator found for username: {}", username);
+            } else {
+                log.error("An error occurred trying to fetch operator with username: {}", username);
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+            }
         }
+        return searchResult;
     }
 
     public List<UserRepresentation> getOperatorByEmail(String email) {
-        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        queryParams.put("exact", Collections.singletonList("true"));
-        queryParams.put("email", Collections.singletonList(email));
-        queryParams.put("briefRepresentation", Collections.singletonList("false"));
+
+        List<UserRepresentation> searchResult = Collections.emptyList();
+
         try {
-            log.info("Searching for operator with email: {}", email);
-            return Arrays.stream(Objects.requireNonNull(restTemplate.getForEntity(keycloakUrl + KC_USERS_ENDPOINT, UserRepresentation[].class, queryParams).getBody())).toList();
+            searchResult = keycloakRestTemplate
+                    .realm(realm)
+                    .users()
+                    .search("", "", "", email, 0, 1);
         } catch (Exception e) {
-            log.info("An error occurred trying to fetch operator with email: {}", email);
-            log.error(e.getMessage());
-            return Collections.emptyList();
+            if (e.getMessage().contains("404")) {
+                log.info("No operator found for email: {}", email);
+            } else {
+                log.error("An error occurred trying to fetch operator with email: {}", email);
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+            }
         }
+        return searchResult;
     }
 
     public List<GroupRepresentation> getOperatorGroups(String operatorId) {
+        log.info("Fetching groups for operator with operator ID: {}", operatorId);
+
+        List<GroupRepresentation> operatorGroups = new ArrayList<>();
+
         try {
-            log.info("Fetching groups for operator with operator ID: {}", operatorId);
-            return Arrays.stream(Objects.requireNonNull(restTemplate.getForEntity(keycloakUrl + KC_USERS_ENDPOINT + "/" + operatorId + "/groups", GroupRepresentation[].class).getBody())).toList();
-        } catch (RestClientException e) {
-            log.error(e.getMessage());
-            return Collections.emptyList();
+            operatorGroups = keycloakRestTemplate
+                    .realm(realm)
+                    .users()
+                    .get(operatorId)
+                    .groups();
+        } catch (Exception e) {
+            if (e.getMessage().contains("404")) {
+                log.info("No operator found for operatorId: {}", operatorId);
+            } else {
+                log.error("An error occurred trying to fetch operator with operatorId: {}", operatorId);
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+            }
         }
+
+        return operatorGroups;
     }
 
     public List<RoleRepresentation> getGroupRealmRoles(String groupId) {
+        log.info("Fetching realm roles for group with group ID: {}", groupId);
+
+        List<RoleRepresentation> groupRealmRoles;
+
         try {
-            log.info("Fetching realm roles for group with group ID: {}", groupId);
-            return Arrays.stream(Objects.requireNonNull(restTemplate.getForEntity(keycloakUrl + KC_GROUPS_ENDPOINT + "/" + groupId + "/role-mappings/realm", RoleRepresentation[].class).getBody())).toList();
-        } catch (RestClientException e) {
-            log.error(e.getMessage());
-            return Collections.emptyList();
+            groupRealmRoles = keycloakRestTemplate
+                    .realm(realm)
+                    .groups()
+                    .group(groupId)
+                    .roles()
+                    .realmLevel()
+                    .listAll();
+        } catch (Exception e) {
+            log.error("An error occurred trying to fetch realm roles for group with groupId: {}", groupId);
+            throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
         }
+
+        return groupRealmRoles;
     }
 
     public List<GroupRepresentation> getRealmGroups() {
-        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        queryParams.put("briefRepresentation", Collections.singletonList("false"));
+
+        List<GroupRepresentation> realmGroups;
+
         try {
-            return Arrays.stream(Objects.requireNonNull(restTemplate.getForEntity(keycloakUrl + KC_GROUPS_ENDPOINT, GroupRepresentation[].class, queryParams).getBody())).toList();
+            realmGroups = keycloakRestTemplate
+                    .realm(realm)
+                    .groups()
+                    .groups();
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return Collections.emptyList();
+            log.error("An error occurred trying to fetch realm groups");
+            throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
         }
+
+        return realmGroups;
     }
 
     public List<RoleRepresentation> getRealmRoles() {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.put("briefRepresentation", Collections.singletonList("false"));
+
+        List<RoleRepresentation> realmRoles;
+
         try {
-            return Arrays.stream(Objects.requireNonNull(restTemplate.getForEntity(keycloakUrl + KC_ROLES_ENDPOINT, RoleRepresentation[].class, queryParams).getBody())).toList();
+            realmRoles = keycloakRestTemplate
+                    .realm(realm)
+                    .roles()
+                    .list();
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return Collections.emptyList();
+            log.error("An error occurred trying to fetch realm roles");
+            throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
         }
+
+        return realmRoles;
     }
+
+
+    /* ----- AUXILIARY METHODS ----- */
+
+
 }

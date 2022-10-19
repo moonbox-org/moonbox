@@ -2,6 +2,7 @@ package org.moonbox.operatormodule.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.moonbox.operatormodule.commands.GetAllOperatorsCommand;
 import org.moonbox.operatormodule.commands.GetLoggedInOperatorCommand;
 import org.moonbox.operatormodule.commands.GetOperatorCommand;
 import org.moonbox.operatormodule.models.Operator;
@@ -73,7 +74,8 @@ public class OperatorController {
     @GetMapping(value = "/list")
     @PreAuthorize("hasRole('operator:read') || hasRole('superuser')")
     ResponseEntity<List<UserRepresentation>> getOperators() {
-        return ResponseEntity.ok(keycloakService.getOperators());
+        GetAllOperatorsCommand command = beanFactory.getBean(GetAllOperatorsCommand.class);
+        return command.execute();
     }
 
     /*

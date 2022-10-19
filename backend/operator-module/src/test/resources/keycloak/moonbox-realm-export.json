@@ -453,7 +453,13 @@
         "superuser",
         "default-roles-moonbox"
       ],
-      "clientRoles": {},
+      "clientRoles": {
+        "realm-management": [
+          "manage-clients",
+          "manage-realm",
+          "manage-users"
+        ]
+      },
       "subGroups": []
     }
   ],
@@ -701,6 +707,9 @@
       "clientId": "moonbox-operator-module-dev",
       "name": "",
       "description": "",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
@@ -714,23 +723,69 @@
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false,
+      "serviceAccountsEnabled": true,
       "publicClient": false,
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
         "oidc.ciba.grant.enabled": "false",
-        "oauth2.device.authorization.grant.enabled": "false",
         "client.secret.creation.time": "1663971596",
         "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "id": "184a2fae-b9ae-4562-94da-91da3a68692b",
+          "name": "Client IP Address",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientAddress",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientAddress",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "f478cda0-a926-49d2-90a4-9b48fd4666e0",
+          "name": "Client ID",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientId",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientId",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "id": "e4b2d6db-c9f7-4db3-88fa-1fe9225e85f7",
+          "name": "Client Host",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usersessionmodel-note-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.session.note": "clientHost",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "clientHost",
+            "jsonType.label": "String"
+          }
+        }
+      ],
       "defaultClientScopes": [
         "web-origins",
         "acr",
+        "phone",
         "roles",
         "profile",
         "groups",
@@ -738,7 +793,6 @@
       ],
       "optionalClientScopes": [
         "address",
-        "phone",
         "offline_access",
         "microprofile-jwt"
       ]
@@ -1430,13 +1484,14 @@
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
   },
   "smtpServer": {},
-  "eventsEnabled": false,
+  "eventsEnabled": true,
+  "eventsExpiration": 600,
   "eventsListeners": [
     "jboss-logging"
   ],
   "enabledEventTypes": [],
-  "adminEventsEnabled": false,
-  "adminEventsDetailsEnabled": false,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
   "identityProviders": [],
   "identityProviderMappers": [],
   "components": {
@@ -2307,6 +2362,41 @@
   },
   "users": [
     {
+      "id": "a1e784c1-3d45-4a51-a380-2e3e297fd6ba",
+      "createdTimestamp": 1664393350032,
+      "username": "service-account-moonbox-operator-module-dev",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": false,
+      "serviceAccountClientId": "moonbox-operator-module-dev",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-moonbox"
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "manage-realm",
+          "query-users",
+          "query-clients",
+          "manage-authorization",
+          "view-realm",
+          "view-users",
+          "manage-users",
+          "manage-clients",
+          "query-groups",
+          "query-realms",
+          "view-clients"
+        ],
+        "account": [
+          "manage-account"
+        ]
+      },
+      "notBefore": 0,
+      "groups": []
+    },
+    {
+      "id": "1234-5678",
       "username": "superuser",
       "email": "superuser@test.com",
       "emailVerified": true,
@@ -2328,6 +2418,7 @@
       ]
     },
     {
+      "id": "8765-4321",
       "username": "operator",
       "email": "operator@test.com",
       "emailVerified": true,
