@@ -189,7 +189,6 @@ public class KeycloakService {
                 throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
             }
         }
-
         return operatorGroups;
     }
 
@@ -210,7 +209,6 @@ public class KeycloakService {
             log.error("An error occurred trying to fetch realm roles for group with groupId: {}", groupId);
             throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
         }
-
         return groupRealmRoles;
     }
 
@@ -227,7 +225,6 @@ public class KeycloakService {
             log.error("An error occurred trying to fetch realm groups");
             throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
         }
-
         return realmGroups;
     }
 
@@ -246,8 +243,50 @@ public class KeycloakService {
             log.error("An error occurred trying to fetch realm roles");
             throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
         }
-
         return realmRoles;
+    }
+
+    public RoleRepresentation getRealmRoleByName(String roleName) {
+
+        RoleRepresentation realmRole;
+
+        try {
+            realmRole = keycloakRestTemplate
+                    .realm(realm)
+                    .roles()
+                    .get(roleName)
+                    .toRepresentation();
+        } catch (Exception e) {
+            if (e.getMessage().contains("404 Not Found")) {
+                log.info("No role found for roleName: {}", roleName);
+                return null;
+            } else {
+                log.error("An error occurred trying to fetch role with name: {}", roleName);
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+            }
+        }
+        return realmRole;
+    }
+
+    public RoleRepresentation getRealmRoleById(String roleId) {
+
+        RoleRepresentation realmRole;
+
+        try {
+            realmRole = keycloakRestTemplate
+                    .realm(realm)
+                    .rolesById()
+                    .getRole(roleId);
+        } catch (Exception e) {
+            if (e.getMessage().contains("404 Not Found")) {
+                log.info("No role found for roleId: {}", roleId);
+                return null;
+            } else {
+                log.error("An error occurred trying to fetch role with ID: {}", roleId);
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+            }
+        }
+        return realmRole;
     }
 
 
