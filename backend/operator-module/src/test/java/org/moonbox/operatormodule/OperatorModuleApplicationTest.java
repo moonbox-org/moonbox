@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OperatorModuleApplicationTest extends BaseTest {
 
 
-    /*----- CONSTANTS -----*/
+    /* ----- CONSTANTS ----- */
 
 
     // operators controller endpoints
@@ -35,8 +35,12 @@ class OperatorModuleApplicationTest extends BaseTest {
     private static final String ROLES = "/api/v1/roles";
     private static final String ROLES_LIST = "/api/v1/roles/list";
 
+    // groups controller endpoints
+    private static final String GROUPS = "/api/v1/groups";
+    private static final String GROUPS_LIST = "/api/v1/groups/list";
 
-    /*----- PARAMETERS -----*/
+
+    /* ----- PARAMETERS ----- */
 
 
     @Autowired
@@ -49,7 +53,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     RolesController rolesController;
 
 
-    /*----- TESTS -----*/
+    /* ----- TESTS ----- */
 
     @Test
     void contextLoads() {
@@ -171,7 +175,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
 
-    // ----- ROLES CONTROLLER ----- //
+    /* ----- ROLES CONTROLLER ----- */
 
 
     @Test
@@ -213,6 +217,15 @@ class OperatorModuleApplicationTest extends BaseTest {
                 .andExpect(jsonPath("$.name").value("operator:read"));
 
         queryParams.clear();
+        queryParams.put("roleName", Collections.singletonList("non-existent-name"));
+
+        mockMvc
+                .perform(get(ROLES)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isNotFound());
+
+        queryParams.clear();
         queryParams.put("roleId", Collections.singletonList("8aec9f53-b9fd-4c67-ab94-0c51c04beaa4"));
 
         mockMvc
@@ -232,4 +245,47 @@ class OperatorModuleApplicationTest extends BaseTest {
                 .andExpect(status().isNotFound());
     }
 
+
+    /* ----- ROLES CONTROLLER ----- */
+
+
+    @Test
+    @DisplayName("get all groups")
+    void testShouldReturnGroupsList() throws Exception {
+        mockMvc
+                .perform(get(GROUPS_LIST)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("get group by id")
+    void testShouldReturnGroupById() throws Exception {
+
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.put("groupId", Collections.singletonList("87555c87-d6a7-4961-91c8-0e57cb70781d"));
+
+        mockMvc
+                .perform(get(GROUPS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("moonbox-operators"));
+
+        queryParams.clear();
+
+        mockMvc.perform(get(GROUPS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isBadRequest()
+                );
+
+        queryParams.put("groupId", Collections.singletonList("non-existent-groupId"));
+
+        mockMvc.perform(get(GROUPS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isNotFound());
+    }
 }

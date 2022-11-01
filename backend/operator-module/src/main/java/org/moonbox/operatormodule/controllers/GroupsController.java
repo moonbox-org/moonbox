@@ -2,7 +2,9 @@ package org.moonbox.operatormodule.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.GroupRepresentation;
+import org.moonbox.operatormodule.commands.GetRealmGroupsCommand;
 import org.moonbox.operatormodule.services.KeycloakService;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,8 @@ public class GroupsController {
 
     /* ----- PARAMETERS ----- */
 
+    @Autowired
+    BeanFactory beanFactory;
 
     @Autowired
     KeycloakService keycloakService;
@@ -37,6 +41,7 @@ public class GroupsController {
     ResponseEntity<GroupRepresentation> getGroupById(
             @RequestParam(name = "groupId", required = true) String groupId
     ) {
-        return null;
+        GetRealmGroupsCommand command = beanFactory.getBean(GetRealmGroupsCommand.class, groupId);
+        return command.execute();
     }
 }

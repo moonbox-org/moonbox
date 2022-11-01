@@ -228,6 +228,28 @@ public class KeycloakService {
         return realmGroups;
     }
 
+    public GroupRepresentation getRealmGroupById(String groupId) {
+
+        GroupRepresentation realmGroup;
+
+        try {
+            realmGroup = keycloakRestTemplate
+                    .realm(realm)
+                    .groups()
+                    .group(groupId)
+                    .toRepresentation();
+        } catch (Exception e) {
+            if (e.getMessage().contains("404 Not Found")) {
+                log.info("No group found for groupId: {}", groupId);
+                return null;
+            } else {
+                log.error("An error occurred trying to fetch group with id: {}", groupId);
+                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+            }
+        }
+        return realmGroup;
+    }
+
     public List<RoleRepresentation> getRealmRoles() {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.put("briefRepresentation", Collections.singletonList("false"));
