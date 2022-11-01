@@ -112,6 +112,15 @@ class OperatorModuleApplicationTest extends BaseTest {
                         .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("1234-5678"));
+
+        queryParams.put("operatorId", Collections.singletonList("non-existent-id"));
+
+        mockMvc
+                .perform(get(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -136,6 +145,15 @@ class OperatorModuleApplicationTest extends BaseTest {
                         .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("operator@test.com"));
+
+        queryParams.put("email", Collections.singletonList("non-existent-email"));
+
+        mockMvc
+                .perform(get(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -151,6 +169,15 @@ class OperatorModuleApplicationTest extends BaseTest {
                         .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("superuser"));
+
+        queryParams.put("username", Collections.singletonList("non-existent-username"));
+
+        mockMvc
+                .perform(get(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @Test
@@ -189,7 +216,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("get role by ID")
+    @DisplayName("get role by ID bad request")
     void testShouldReturnBadRequestForRoles() throws Exception {
 
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
@@ -223,7 +250,8 @@ class OperatorModuleApplicationTest extends BaseTest {
                 .perform(get(ROLES)
                         .params(queryParams)
                         .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
 
         queryParams.clear();
         queryParams.put("roleId", Collections.singletonList("8aec9f53-b9fd-4c67-ab94-0c51c04beaa4"));
@@ -242,7 +270,8 @@ class OperatorModuleApplicationTest extends BaseTest {
                 .perform(get(ROLES)
                         .params(queryParams)
                         .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
 
@@ -261,7 +290,7 @@ class OperatorModuleApplicationTest extends BaseTest {
 
     @Test
     @DisplayName("get group by id")
-    void testShouldReturnGroupById() throws Exception {
+    void testShouldReturnGroupByIdOrGroupName() throws Exception {
 
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.put("groupId", Collections.singletonList("87555c87-d6a7-4961-91c8-0e57cb70781d"));
@@ -286,6 +315,43 @@ class OperatorModuleApplicationTest extends BaseTest {
         mockMvc.perform(get(GROUPS)
                         .params(queryParams)
                         .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
+
+        queryParams.clear();
+        queryParams.put("groupName", Collections.singletonList("moonbox-operators"));
+
+        mockMvc.perform(get(GROUPS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("moonbox-operators"));
+
+        queryParams.clear();
+        queryParams.put("groupName", Collections.singletonList("moonbox-oper"));
+
+        mockMvc.perform(get(GROUPS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("moonbox-operators"));
+
+        queryParams.clear();
+        queryParams.put("groupName", Collections.singletonList("super"));
+
+        mockMvc.perform(get(GROUPS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("moonbox-superusers"));
+
+        queryParams.clear();
+        queryParams.put("groupName", Collections.singletonList("non-existent-name"));
+
+        mockMvc.perform(get(GROUPS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 }

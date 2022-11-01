@@ -38,10 +38,11 @@ public class GroupsController {
     }
 
     @GetMapping()
-    ResponseEntity<GroupRepresentation> getGroupById(
-            @RequestParam(name = "groupId", required = true) String groupId
+    ResponseEntity<GroupRepresentation> getGroup(
+            @RequestParam(name = "groupId", required = false) String groupId,
+            @RequestParam(name = "groupName", required = false) String groupName
     ) {
-        GetRealmGroupsCommand command = beanFactory.getBean(GetRealmGroupsCommand.class, groupId);
+        GetRealmGroupsCommand command = beanFactory.getBean(GetRealmGroupsCommand.class, groupId, groupName);
         return command.execute();
     }
 }

@@ -59,7 +59,7 @@ public class GetOperatorCommand {
             operator = keycloakService.getOperatorById(operatorId);
 
             if (operator == null) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.ok().build();
             }
 
             return ResponseEntity.ok(operator);
@@ -73,7 +73,7 @@ public class GetOperatorCommand {
             List<UserRepresentation> operatorsList = keycloakService.getOperatorByUsername(username);
 
             if (operatorsList.stream().noneMatch(u -> u.getUsername().equalsIgnoreCase(username))) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.ok().build();
             }
 
             operatorsList.forEach(userRepresentation -> {
@@ -96,7 +96,7 @@ public class GetOperatorCommand {
         List<UserRepresentation> operatorsList = keycloakService.getOperatorByEmail(email);
 
         if (operatorsList.stream().noneMatch(u -> u.getEmail().equalsIgnoreCase(email))) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok().build();
         }
 
         operatorsList.forEach(userRepresentation -> {

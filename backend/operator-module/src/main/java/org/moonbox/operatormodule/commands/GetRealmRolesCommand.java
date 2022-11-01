@@ -55,7 +55,7 @@ public class GetRealmRolesCommand {
         }
 
         if (role == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok().build();
         }
 
         return ResponseEntity.ok(role);

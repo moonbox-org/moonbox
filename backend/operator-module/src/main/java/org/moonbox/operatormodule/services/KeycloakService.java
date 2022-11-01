@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServerErrorException;
@@ -41,7 +39,7 @@ public class KeycloakService {
     private String keycloakUrl;
 
     @Autowired
-    private Keycloak keycloakRestTemplate;
+    private Keycloak keycloakAdminClient;
 
 
     /* ----- METHODS ----- */
@@ -72,7 +70,7 @@ public class KeycloakService {
         List<UserRepresentation> operators;
 
         try {
-            operators = keycloakRestTemplate
+            operators = keycloakAdminClient
                     .realm(realm)
                     .users()
                     .list();
@@ -94,7 +92,7 @@ public class KeycloakService {
         List<RoleRepresentation> groupRealmRoleRepresentations = new ArrayList<>();
 
         try {
-            operator = keycloakRestTemplate
+            operator = keycloakAdminClient
                     .realm("moonbox")
                     .users()
                     .get(operatorId).toRepresentation();
@@ -108,7 +106,7 @@ public class KeycloakService {
             }
         }
 
-        List<GroupRepresentation> operatorGroupRepresentations = keycloakRestTemplate
+        List<GroupRepresentation> operatorGroupRepresentations = keycloakAdminClient
                 .realm(realm)
                 .users()
                 .get(operatorId)
@@ -116,7 +114,7 @@ public class KeycloakService {
 
         if (!operatorGroupRepresentations.isEmpty()) {
             operatorGroupRepresentations.forEach(g -> {
-                groupRealmRoleRepresentations.addAll(keycloakRestTemplate
+                groupRealmRoleRepresentations.addAll(keycloakAdminClient
                         .realm(realm)
                         .groups()
                         .group(g.getId())
@@ -132,41 +130,33 @@ public class KeycloakService {
 
     public List<UserRepresentation> getOperatorByUsername(String username) {
 
-        List<UserRepresentation> searchResult = Collections.emptyList();
+        List<UserRepresentation> searchResult;
 
         try {
-            searchResult = keycloakRestTemplate
+            searchResult = keycloakAdminClient
                     .realm(realm)
                     .users()
                     .search(username, true);
         } catch (Exception e) {
-            if (e.getMessage().contains("404")) {
-                log.info("No operator found for username: {}", username);
-            } else {
                 log.error("An error occurred trying to fetch operator with username: {}", username);
                 throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
             }
-        }
         return searchResult;
     }
 
     public List<UserRepresentation> getOperatorByEmail(String email) {
 
-        List<UserRepresentation> searchResult = Collections.emptyList();
+        List<UserRepresentation> searchResult;
 
         try {
-            searchResult = keycloakRestTemplate
+            searchResult = keycloakAdminClient
                     .realm(realm)
                     .users()
                     .search("", "", "", email, 0, 1);
         } catch (Exception e) {
-            if (e.getMessage().contains("404")) {
-                log.info("No operator found for email: {}", email);
-            } else {
                 log.error("An error occurred trying to fetch operator with email: {}", email);
                 throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
             }
-        }
         return searchResult;
     }
 
@@ -176,7 +166,7 @@ public class KeycloakService {
         List<GroupRepresentation> operatorGroups = new ArrayList<>();
 
         try {
-            operatorGroups = keycloakRestTemplate
+            operatorGroups = keycloakAdminClient
                     .realm(realm)
                     .users()
                     .get(operatorId)
@@ -198,7 +188,7 @@ public class KeycloakService {
         List<RoleRepresentation> groupRealmRoles;
 
         try {
-            groupRealmRoles = keycloakRestTemplate
+            groupRealmRoles = keycloakAdminClient
                     .realm(realm)
                     .groups()
                     .group(groupId)
@@ -217,7 +207,7 @@ public class KeycloakService {
         List<GroupRepresentation> realmGroups;
 
         try {
-            realmGroups = keycloakRestTemplate
+            realmGroups = keycloakAdminClient
                     .realm(realm)
                     .groups()
                     .groups();
@@ -233,7 +223,7 @@ public class KeycloakService {
         GroupRepresentation realmGroup;
 
         try {
-            realmGroup = keycloakRestTemplate
+            realmGroup = keycloakAdminClient
                     .realm(realm)
                     .groups()
                     .group(groupId)
@@ -250,14 +240,28 @@ public class KeycloakService {
         return realmGroup;
     }
 
+    public List<GroupRepresentation> getRealmGroupByName(String groupName) {
+
+        List<GroupRepresentation> realmGroup;
+
+        try {
+            realmGroup = keycloakAdminClient
+                    .realm(realm)
+                    .groups()
+                    .groups(groupName, 0, 1000, false);
+        } catch (Exception e) {
+            log.error("An error occurred trying to fetch group with name: {}", groupName);
+            throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+        }
+        return realmGroup;
+    }
+
     public List<RoleRepresentation> getRealmRoles() {
-        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
-        queryParams.put("briefRepresentation", Collections.singletonList("false"));
 
         List<RoleRepresentation> realmRoles;
 
         try {
-            realmRoles = keycloakRestTemplate
+            realmRoles = keycloakAdminClient
                     .realm(realm)
                     .roles()
                     .list();
@@ -273,7 +277,7 @@ public class KeycloakService {
         RoleRepresentation realmRole;
 
         try {
-            realmRole = keycloakRestTemplate
+            realmRole = keycloakAdminClient
                     .realm(realm)
                     .roles()
                     .get(roleName)
@@ -295,7 +299,7 @@ public class KeycloakService {
         RoleRepresentation realmRole;
 
         try {
-            realmRole = keycloakRestTemplate
+            realmRole = keycloakAdminClient
                     .realm(realm)
                     .rolesById()
                     .getRole(roleId);
