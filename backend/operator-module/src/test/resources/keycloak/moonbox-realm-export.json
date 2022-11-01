@@ -2415,6 +2415,9 @@
       },
       "realmRoles": [
         "superuser"
+      ],
+      "groups": [
+        "moonbox-superusers"
       ]
     },
     {
@@ -2438,6 +2441,9 @@
       "realmRoles": [
         "operator:read",
         "operator:write"
+      ],
+      "groups": [
+        "moonbox-operators"
       ]
     }
   ]
