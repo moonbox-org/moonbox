@@ -1,12 +1,12 @@
 package org.moonbox.operatormodule;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.jupiter.api.*;
 import org.moonbox.operatormodule.controllers.OperatorController;
 import org.moonbox.operatormodule.controllers.RolesController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -14,11 +14,13 @@ import org.springframework.util.MultiValueMap;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class OperatorModuleApplicationTest extends BaseTest {
 
 
@@ -56,12 +58,14 @@ class OperatorModuleApplicationTest extends BaseTest {
     /* ----- TESTS ----- */
 
     @Test
+    @Order(1)
     void contextLoads() {
         Assertions.assertNotNull(operatorController);
         Assertions.assertNotNull(rolesController);
     }
 
     @Test
+    @Order(2)
     @DisplayName("return 3xx redirect")
     void testShouldReturn3xxRedirect() throws Exception {
         mockMvc
@@ -74,6 +78,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(3)
     @DisplayName("return default string")
     void testShouldReturnDefaultString() throws Exception {
         mockMvc
@@ -82,6 +87,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(4)
     @DisplayName("return logged-in superuser")
     void testShouldReturnLoggedInSuperuser() throws Exception {
         mockMvc
@@ -91,6 +97,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(5)
     @DisplayName("return logged-in operator user")
     void testShouldReturnLoggedInOperator() throws Exception {
         mockMvc
@@ -100,6 +107,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(6)
     @DisplayName("return operator by operatorId")
     void testShouldReturnOperatorByOperatorId() throws Exception {
 
@@ -124,6 +132,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(7)
     @DisplayName("return operator by email")
     void testShouldReturnOperatorByEmail() throws Exception {
 
@@ -157,6 +166,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(8)
     @DisplayName("return operator by username")
     void testShouldReturnOperatorByUsername() throws Exception {
 
@@ -181,6 +191,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(9)
     @DisplayName("return bad request")
     void testShouldReturnBadRequest() throws Exception {
         mockMvc
@@ -190,6 +201,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(10)
     @DisplayName("return all operators")
     void testShouldReturnAllOperators() throws Exception {
         mockMvc
@@ -198,7 +210,68 @@ class OperatorModuleApplicationTest extends BaseTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isNotEmpty())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$", hasSize(4)));
+    }
+
+    @Test
+    @Order(99)
+    @DisplayName("delete operator")
+    void testShouldDeleteOperator() throws Exception {
+
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+
+        mockMvc
+                .perform(delete(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isBadRequest());
+
+        queryParams.put("operatorId", Collections.singletonList("non-existent-id"));
+        mockMvc
+                .perform(delete(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk());
+
+        queryParams.clear();
+        queryParams.put("username", Collections.singletonList("non-existent-username"));
+        mockMvc
+                .perform(delete(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk());
+
+        queryParams.clear();
+        queryParams.put("email", Collections.singletonList("non-existent-email"));
+        mockMvc
+                .perform(delete(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk());
+
+        queryParams.clear();
+        queryParams.put("operatorId", Collections.singletonList("1234-5678"));
+        mockMvc
+                .perform(delete(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk());
+
+        queryParams.clear();
+        queryParams.put("username", Collections.singletonList("delete-me-1"));
+        mockMvc
+                .perform(delete(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk());
+
+        queryParams.clear();
+        queryParams.put("email", Collections.singletonList("delete-me-2@test.com"));
+        mockMvc
+                .perform(delete(OPERATORS)
+                        .params(queryParams)
+                        .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + superuserAuthToken))
+                .andExpect(status().isOk());
     }
 
 
@@ -206,6 +279,7 @@ class OperatorModuleApplicationTest extends BaseTest {
 
 
     @Test
+    @Order(11)
     @DisplayName("get role by ID")
     void testShouldReturnRolesList() throws Exception {
         mockMvc
@@ -216,6 +290,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(12)
     @DisplayName("get role by ID bad request")
     void testShouldReturnBadRequestForRoles() throws Exception {
 
@@ -230,6 +305,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(13)
     @DisplayName("get role by name or id")
     void testShouldReturnRoleByNameOrId() throws Exception {
 
@@ -279,6 +355,7 @@ class OperatorModuleApplicationTest extends BaseTest {
 
 
     @Test
+    @Order(14)
     @DisplayName("get all groups")
     void testShouldReturnGroupsList() throws Exception {
         mockMvc
@@ -289,6 +366,7 @@ class OperatorModuleApplicationTest extends BaseTest {
     }
 
     @Test
+    @Order(15)
     @DisplayName("get group by id")
     void testShouldReturnGroupByIdOrGroupName() throws Exception {
 

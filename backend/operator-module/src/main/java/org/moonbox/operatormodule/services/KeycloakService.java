@@ -93,7 +93,7 @@ public class KeycloakService {
 
         try {
             operator = keycloakAdminClient
-                    .realm("moonbox")
+                    .realm(realm)
                     .users()
                     .get(operatorId).toRepresentation();
         } catch (Exception e) {
@@ -138,9 +138,9 @@ public class KeycloakService {
                     .users()
                     .search(username, true);
         } catch (Exception e) {
-                log.error("An error occurred trying to fetch operator with username: {}", username);
-                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
-            }
+            log.error("An error occurred trying to fetch operator with username: {}", username);
+            throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+        }
         return searchResult;
     }
 
@@ -154,9 +154,9 @@ public class KeycloakService {
                     .users()
                     .search("", "", "", email, 0, 1);
         } catch (Exception e) {
-                log.error("An error occurred trying to fetch operator with email: {}", email);
-                throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
-            }
+            log.error("An error occurred trying to fetch operator with email: {}", email);
+            throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+        }
         return searchResult;
     }
 
@@ -180,6 +180,22 @@ public class KeycloakService {
             }
         }
         return operatorGroups;
+    }
+
+    public void deleteOperatorById(String operatorId) {
+        log.info("Deleting operator with ID: {}", operatorId);
+
+        try {
+            keycloakAdminClient
+                    .realm(realm)
+                    .users()
+                    .delete(operatorId)
+                    .close();
+            log.info("Operator with ID: {} deleted", operatorId);
+        } catch (Exception e) {
+            log.error("An error occurred trying to delete operator with ID: {}", operatorId);
+            throw new ServerErrorException(e.getMessage(), INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     public List<RoleRepresentation> getGroupRealmRoles(String groupId) {

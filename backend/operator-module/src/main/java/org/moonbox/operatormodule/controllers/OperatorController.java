@@ -2,6 +2,7 @@ package org.moonbox.operatormodule.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.moonbox.operatormodule.commands.DeleteOperatorCommand;
 import org.moonbox.operatormodule.commands.GetAllOperatorsCommand;
 import org.moonbox.operatormodule.commands.GetLoggedInOperatorCommand;
 import org.moonbox.operatormodule.commands.GetOperatorCommand;
@@ -11,10 +12,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -57,7 +55,7 @@ public class OperatorController {
     /*
      * returns the operator according to the search parameter
      */
-    @GetMapping()
+    @GetMapping
     @PreAuthorize("hasRole('operator:read') || hasRole('superuser')")
     ResponseEntity<UserRepresentation> getOperator(
             @RequestParam(name = "operatorId", required = false) String operatorId,
@@ -75,6 +73,19 @@ public class OperatorController {
     @PreAuthorize("hasRole('operator:read') || hasRole('superuser')")
     ResponseEntity<List<UserRepresentation>> getOperators() {
         GetAllOperatorsCommand command = beanFactory.getBean(GetAllOperatorsCommand.class);
+        return command.execute();
+    }
+
+    @DeleteMapping
+    @PreAuthorize("hasRole('operator:delete') || hasRole('superuser')")
+    ResponseEntity<Void> deleteOperatorByIdOrUsernameOrEmail(
+            @RequestParam(name = "operatorId", required = false) String operatorId,
+            @RequestParam(name = "username", required = false) String username,
+            @RequestParam(name = "email", required = false) String email
+    ) {
+
+        DeleteOperatorCommand command = beanFactory.getBean(DeleteOperatorCommand.class, operatorId, username, email);
+
         return command.execute();
     }
 
