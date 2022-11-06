@@ -27,7 +27,7 @@ public class BaseTest {
 
     /*----- PARAMETERS -----*/
 
-    public static final String KEYCLOAK_CONTAINER_IMAGE = "quay.io/keycloak/keycloak:19.0.1";
+    public static final String KEYCLOAK_CONTAINER_IMAGE = "quay.io/keycloak/keycloak:20.0.0";
     public static final String KEYCLOAK_REALM_IMPORT_FILE = "keycloak/moonbox-realm-export.json";
     public static final String GRANT_TYPE = "grant_type";
     public static final String CLIENT_ID = "client_id";
