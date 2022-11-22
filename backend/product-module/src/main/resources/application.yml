@@ -21,6 +21,8 @@ logging:
     root: info
     org.springframework.web: debug
     org.springframework.data.mongodb: debug
+    #file:
+    #name: path\to\log\folder\moonbox-product-module.log
 
 ### spring ###
 
@@ -57,3 +59,14 @@ management:
     web:
       exposure:
         include: health
+
+### keycloak ###
+
+keycloak:
+  realm: moonbox
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL}
+  ssl-required: external
+  use-resource-role-mappings: false
+  resource: ${PRODUCT_MODULE_KEYCLOAK_CLIENT_ID}
+  credentials:
+    secret: ${PRODUCT_MODULE_KEYCLOAK_CLIENT_SECRET}

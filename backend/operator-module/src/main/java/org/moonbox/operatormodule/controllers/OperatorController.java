@@ -37,7 +37,7 @@ public class OperatorController {
     /* ----- METHODS ----- */
 
 
-    /*
+    /**
      * returns the operator that is currently logged in
      */
     @GetMapping(value = "/loggedInOperator")
@@ -52,7 +52,7 @@ public class OperatorController {
         return ResponseEntity.ok(output);
     }
 
-    /*
+    /**
      * returns the operator according to the search parameter
      */
     @GetMapping
@@ -66,7 +66,7 @@ public class OperatorController {
         return command.execute();
     }
 
-    /*
+    /**
      * returns the complete list of operators from keycloak
      */
     @GetMapping(value = "/list")
@@ -89,7 +89,7 @@ public class OperatorController {
         return command.execute();
     }
 
-    /*
+    /**
      * test endpoint
      */
     @GetMapping(value = "/test")
