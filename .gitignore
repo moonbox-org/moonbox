@@ -6,6 +6,11 @@
 *.launch
 .settings/
 *.sublime-workspace
+.mvn
+*/.mvn
+mvnw
+mvnw.cmd
+docker-compose.yml
 
 # Visual Studio Code
 .vscode/*
