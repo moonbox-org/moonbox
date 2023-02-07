@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+  ### ---------- REDIS
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - moonbox-local
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  ### ---------- POSTGRES-KEYCLOAK
+  postgres:
+    container_name: kc-postgres
+    image: postgres
+    volumes:
+      - /path/to/your/local/storage:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: changeme
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+    networks:
+      - moonbox-local
+  ### ---------- KEYCLOAK
+  keycloak:
+    container_name: kc-local
+    image: quay.io/keycloak/keycloak:20.0.3
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: changeme
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: changeme
+    expose:
+      - 9000
+    ports:
+      - 9000:9000
+    command:
+      - "start-dev"
+      - "--http-port=9000"
+    depends_on:
+      - postgres
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+    networks:
+      - moonbox-local
+  ### ---------- API GATEWAY
+  gateway:
+    image: moonbox/gateway
+    container_name: gateway
+    command:
+      - npm start
+    depends_on:
+      - redis
+      - keycloak
+    expose:
+      - 8000
+    ports:
+      - "8000:8000"
+    networks:
+      - moonbox-local
+    environment:
+      - GATEWAY_CLIENT_SECRET=<your-client-secret>
+      - GATEWAY_AUTHSERVER_ISSUER_URI=http://keycloak:9000/realms/local
+      - GATEWAY_REDIS_HOST=redis
+      - GATEWAY_REDIS_PORT=6379
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+### ----------
+networks:
+  moonbox-local:

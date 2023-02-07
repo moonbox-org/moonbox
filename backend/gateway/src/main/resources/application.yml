@@ -1,0 +1,37 @@
+server:
+  port: 8000
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          gateway-client:
+            provider: keycloak
+            client-id: gateway
+            client-secret: ${GATEWAY_CLIENT_SECRET:LPX43LoHek5l6iCGHPvQTNpyjK2ms07C}
+            scope: openid
+        provider:
+          keycloak:
+            issuer-uri: ${GATEWAY_AUTHSERVER_ISSUER_URI:http://localhost:9000/realms/local}
+            user-name-attribute: preferred_username
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: http://frontend:[*],http://gateway:[*]
+            allowedHeaders: "*"
+            allowedMethods: "*"
+            allowCredentials: true
+  data:
+    redis:
+      host: ${GATEWAY_REDIS_HOST:redis}
+      port: ${GATEWAY_REDIS_PORT:6379}
+  session:
+    store-type: redis
+
+logging:
+  level:
+    org.springframework.security: INFO
+    org.springframework.cloud.gateway: INFO

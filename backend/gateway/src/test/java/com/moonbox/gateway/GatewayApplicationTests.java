@@ -1,13 +1,9 @@
-package org.moonbox.moonboxapi;
+package com.moonbox.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MoonboxApiApplicationTest {
-
-    @Test
-    void contextLoads() {
-    }
+class GatewayApplicationTests {
 
 }
