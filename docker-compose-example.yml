@@ -79,8 +79,31 @@ services:
     environment:
       - GATEWAY_CLIENT_SECRET=<your-client-secret>
       - GATEWAY_AUTHSERVER_ISSUER_URI=http://keycloak:9000/realms/local
+      - GATEWAY_FRONTEND_URI=http://frontend:4200
       - GATEWAY_REDIS_HOST=redis
       - GATEWAY_REDIS_PORT=6379
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+  ### ----------
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    depends_on:
+      - redis
+      - gateway
+      - keycloak
+    expose:
+      - 4200
+    volumes:
+      - ./frontend:/app
+    networks:
+      - moonbox-local
     deploy:
       restart_policy:
         condition: on-failure

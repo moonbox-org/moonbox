@@ -1,0 +1,9 @@
+{
+  "/backend": {
+    "target": "http://gateway:8000",
+    "secure": false,
+    "pathRewrite": {
+      "^/backend": ""
+    }
+  }
+}

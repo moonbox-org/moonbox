@@ -24,6 +24,14 @@ spring:
             allowedHeaders: "*"
             allowedMethods: "*"
             allowCredentials: true
+      routes:
+        - id: frontend
+          uri: ${GATEWAY_FRONTEND_URI:http://frontend:4200}
+          predicates:
+            - Path=/**
+          filters:
+            - TokenRelay=
+            - SaveSession
   data:
     redis:
       host: ${GATEWAY_REDIS_HOST:redis}
