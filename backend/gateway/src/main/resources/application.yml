@@ -25,6 +25,22 @@ spring:
             allowedMethods: "*"
             allowCredentials: true
       routes:
+        - id: get_demo
+          uri: ${GATEWAY_BENEFICIARIES_URI:http://beneficiaries:8080}
+          predicates:
+            - Method=GET
+            - Path=/api/v1/beneficiaries/demo
+          filters:
+            - TokenRelay=
+            - SaveSession
+        - id: post_demo
+          uri: ${GATEWAY_BENEFICIARIES_URI:http://beneficiaries:8080}
+          predicates:
+            - Method=POST
+            - Path=/api/v1/beneficiaries/demo
+          filters:
+            - TokenRelay=
+            - SaveSession
         - id: frontend
           uri: ${GATEWAY_FRONTEND_URI:http://frontend:4200}
           predicates:

@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${BENEFICIARIES_AUTHSERVER_ISSUER_URI:http://keycloak:9000/realms/local}
+
+props:
+  jwksUri: ${BENEFICIARIES_JWKS_URI:http://localhost:9000/realms/local/protocol/openid-connect/certs}
