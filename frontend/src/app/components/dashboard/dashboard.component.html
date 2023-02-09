@@ -1,0 +1,63 @@
+<div class="grid">
+  <div class="col-12 lg:col-6 xl:col-3">
+    <div class="card mb-0">
+      <div class="flex justify-content-between mb-3">
+        <div>
+          <span class="block text-500 font-medium mb-3">Orders</span>
+          <div class="text-900 font-medium text-xl">152</div>
+        </div>
+        <div
+          class="flex align-items-center justify-content-center bg-blue-100 border-round"
+          style="width: 2.5rem; height: 2.5rem"
+        >
+          <i class="pi pi-shopping-cart text-blue-500 text-xl"></i>
+        </div>
+      </div>
+      <span class="text-green-500 font-medium">24 new </span
+      ><span class="text-500">since last visit</span>
+    </div>
+  </div>
+  <div class="col-12">
+    <div class="card">
+      <p-table
+        [value]="beneficiaries"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        [globalFilterFields]="['id']"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="id" style="width: 20%">
+              ID
+              <p-columnFilter
+                type="text"
+                field="id"
+                display="menu"
+              ></p-columnFilter>
+            </th>
+            <th pSortableColumn="first_name" style="width: 20%">
+              First name <p-sortIcon field="first_name"></p-sortIcon>
+            </th>
+            <th>Last name</th>
+            <th>Email</th>
+            <th>Gender</th>
+            <th>IP ADDR.</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-beneficiary>
+          <tr>
+            <td>{{ beneficiary.id }}</td>
+            <td>{{ beneficiary.first_name }}</td>
+            <td>{{ beneficiary.last_name }}</td>
+            <td>{{ beneficiary.email }}</td>
+            <td>{{ beneficiary.gender }}</td>
+            <td>{{ beneficiary.ip_address }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
