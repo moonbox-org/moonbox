@@ -1,15 +1,20 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { PrimeNGConfig } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'frontend';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private primengConfig: PrimeNGConfig) {}
+
+  ngOnInit(): void {
+    this.primengConfig.ripple = true;
+  }
 
   demoGet() {
     this.http
