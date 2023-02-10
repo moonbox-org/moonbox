@@ -5,18 +5,20 @@ spring:
   jpa:
     properties:
       hibernate:
+        jdbc:
+          time_zone: UTC
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: ${BENEFICIARIES_HIBERNATE_DDL_AUTO:update}
+      ddl-auto: ${BENEFICIARIES_HIBERNATE_DDL_AUTO:create-drop}
       show-sql: ${BENEFICIARIES_HIBERNATE_SHOW_SQL:true}
   datasource:
-    url: ${BENEFICIARIES_DATASOURCE_URL:jdbc:postgresql://postgres/beneficiaries}
-    username: ${BENEFICIARIES_POSTGRES_USERNAME:beneficiaries}
+    url: ${BENEFICIARIES_DATASOURCE_URL:jdbc:postgresql://localhost:5432/develop}
+    username: ${BENEFICIARIES_POSTGRES_USERNAME:develop}
     password: ${BENEFICIARIES_POSTGRES_PASSWORD:password}
-#    initialization-mode: always
-#    initialize: true
-#    schema: classpath:/schema.sql
-#    continue-on-error: true
+  #    initialization-mode: always
+  #    initialize: true
+  #    schema: classpath:/schema.sql
+  #    continue-on-error: true
   security:
     oauth2:
       resourceserver:
