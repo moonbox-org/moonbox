@@ -6,8 +6,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.AUTO;
 
 @Data
@@ -29,5 +31,10 @@ public class Beneficiary extends BaseEntity {
     @OneToOne(cascade = PERSIST, fetch = EAGER)
     @JoinColumn(name = "practice_id", referencedColumnName = "id")
     private BeneficiaryPractice practice;
+
+    @JsonManagedReference
+    @OneToOne(cascade = ALL, fetch = LAZY)
+    @JoinColumn(name = "personal_details_id", referencedColumnName = "id")
+    private PersonalDetails personalDetails;
 
 }

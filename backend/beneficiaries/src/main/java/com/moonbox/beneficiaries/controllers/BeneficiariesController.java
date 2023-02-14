@@ -1,8 +1,8 @@
 package com.moonbox.beneficiaries.controllers;
 
+import com.moonbox.beneficiaries.commands.BeneficiaryCommand;
 import com.moonbox.beneficiaries.entities.Beneficiary;
-import com.moonbox.beneficiaries.repositories.BeneficiaryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,11 +14,16 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/beneficiaries")
 public class BeneficiariesController {
 
-    @Autowired
-    private BeneficiaryRepository beneficiaryRepository;
+    private final BeanFactory beanFactory;
+
+    public BeneficiariesController(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+    }
 
     @GetMapping
     public ResponseEntity<List<Beneficiary>> getBeneficiaries() {
-        return ResponseEntity.ok(beneficiaryRepository.findAll());
+
+        BeneficiaryCommand command = beanFactory.getBean(BeneficiaryCommand.class);
+        return ResponseEntity.ok(command.execute());
     }
 }
