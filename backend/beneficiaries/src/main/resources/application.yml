@@ -25,5 +25,9 @@ spring:
         jwt:
           issuer-uri: ${BENEFICIARIES_AUTHSERVER_ISSUER_URI:http://keycloak:9000/realms/local}
 
+logging:
+  level:
+    org.springframework.web: DEBUG
+
 props:
   jwksUri: ${BENEFICIARIES_JWKS_URI:http://localhost:9000/realms/local/protocol/openid-connect/certs}
