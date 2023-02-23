@@ -3,6 +3,7 @@ package com.moonbox.beneficiaries.entities;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -38,6 +39,7 @@ public class PersonalDetails extends BaseEntity {
     @Column(name = "fathers_name")
     private String fathersName;
 
+    @PastOrPresent
     @JsonFormat(shape = STRING)
     @DateTimeFormat(iso = DATE)
     private LocalDate dateOfBirth;
