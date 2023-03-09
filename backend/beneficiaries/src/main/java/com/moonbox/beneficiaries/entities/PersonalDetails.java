@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static jakarta.persistence.GenerationType.AUTO;
@@ -51,4 +52,14 @@ public class PersonalDetails extends BaseEntity {
     @JsonFormat(shape = STRING)
     @DateTimeFormat(iso = DATE)
     private LocalDate dateOfArrivalInAthens;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    private Country country;
+
+    @ManyToMany
+    @JoinTable(name = "beneficiaries_languages",
+            joinColumns = @JoinColumn(name = "beneficiary_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "languages_id", referencedColumnName = "id")
+    )
+    private Set<Language> motherTongues;
 }

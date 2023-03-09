@@ -53,6 +53,8 @@ public class BeneficiariesApplication {
             List<Country> countries = mapper.readValue(inputStream, typeReference);
 
             for (Country c : countries) {
+                if (countryService.existsByCountryCode(c.getCode()))
+                    break;
                 if (c.getContinent() != null) {
                     Continent continent = continentRepository.findByCode(c.getContinent().getCode());
                     if (continent != null) {

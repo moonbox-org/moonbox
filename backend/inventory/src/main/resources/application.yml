@@ -1,0 +1,33 @@
+server:
+  port: 8085
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${INVENTORY_HIBERNATE_DDL_AUTO:create-drop}
+      show-sql: ${INVENTORY_HIBERNATE_SHOW_SQL:true}
+  datasource:
+    url: ${INVENTORY_DATASOURCE_URL:jdbc:postgresql://localhost:5432/develop}
+    username: ${INVENTORY_POSTGRES_USERNAME:develop}
+    password: ${INVENTORY_POSTGRES_PASSWORD:password}
+  #    initialization-mode: always
+  #    initialize: true
+  #    schema: classpath:/schema.sql
+  #    continue-on-error: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${BENEFICIARIES_AUTHSERVER_ISSUER_URI:http://keycloak:9000/realms/local}
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+
+props:
+  jwksUri: ${INVENTORY_JWKS_URI:http://localhost:9000/realms/local/protocol/openid-connect/certs}

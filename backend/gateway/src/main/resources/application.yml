@@ -38,6 +38,11 @@ spring:
           predicates:
             - Method=POST
             - Path=/api/v1/beneficiaries/demo
+        - id: countries_demo
+          uri: ${GATEWAY_BENEFICIARIES_URI:http://beneficiaries:8080}
+          predicates:
+            - Method=GET
+            - Path=/api/v1/countries
           filters:
             - TokenRelay=
             - SaveSession

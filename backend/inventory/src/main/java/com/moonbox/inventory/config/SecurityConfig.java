@@ -1,4 +1,4 @@
-package com.moonbox.beneficiaries.config;
+package com.moonbox.inventory.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

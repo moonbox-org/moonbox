@@ -26,4 +26,8 @@ public class CountryService {
     public Country saveCountry(Country country) {
         return countryRepository.save(country);
     }
+
+    public boolean existsByCountryCode(String code) {
+        return countryRepository.existsByCode(code);
+    }
 }

@@ -2,11 +2,10 @@ package com.moonbox.beneficiaries.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 import java.util.Set;
 
+import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.GenerationType.AUTO;
 
@@ -19,10 +18,10 @@ public class Country {
     @GeneratedValue(strategy = AUTO)
     private Long id;
 
-    @Column(name = "code", unique = true)
+    @Column(name = "code", nullable = false, unique = true)
     private String code;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "native_name")
@@ -37,9 +36,8 @@ public class Country {
     @Column(name = "currency")
     private String currency;
 
-    @ManyToOne
+    @ManyToOne(cascade = MERGE)
     @JoinColumn(name = "continent_id")
-    @Cascade(CascadeType.MERGE)
     private Continent continent;
 
     @ManyToMany(cascade = PERSIST)
