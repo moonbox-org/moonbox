@@ -14,7 +14,7 @@ import static jakarta.persistence.GenerationType.UUID;
 @Data
 @Entity
 @Table(name = "items")
-public class Item {
+public class Item extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = UUID)
