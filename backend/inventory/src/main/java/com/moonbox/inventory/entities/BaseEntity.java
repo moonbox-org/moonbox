@@ -15,12 +15,12 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 @MappedSuperclass
 public class BaseEntity {
 
-    private final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
     @CreatedDate
     @JsonFormat(shape = STRING, pattern = DATE_TIME_PATTERN)
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_date", updatable = false)
+    private LocalDateTime createdDate;
 
     @CreatedBy
     @JsonFormat(shape = STRING)
@@ -29,11 +29,11 @@ public class BaseEntity {
 
     @LastModifiedDate
     @JsonFormat(shape = STRING, pattern = DATE_TIME_PATTERN)
-    @Column(name = "last_updated_at")
-    private LocalDateTime lastUpdatedAt;
+    @Column(name = "last_modified_date")
+    private LocalDateTime lastModifiedDate;
 
     @LastModifiedBy
     @JsonFormat(shape = STRING)
-    @Column(name = "last_updated_by")
-    private String lastUpdatedBy;
+    @Column(name = "last_modified_date_by")
+    private String lastModifiedBy;
 }

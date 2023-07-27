@@ -1,11 +1,14 @@
 package com.moonbox.inventory.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Set;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.FetchType.EAGER;
@@ -15,6 +18,8 @@ import static jakarta.persistence.GenerationType.UUID;
 @Entity
 @Table(name = "items")
 public class Item extends BaseEntity {
+
+    private final String EXPIRATION_DATE_PATTERN = "yyyy-MM-dd";
 
     @Id
     @GeneratedValue(strategy = UUID)
@@ -33,4 +38,11 @@ public class Item extends BaseEntity {
     @ManyToOne(cascade = MERGE)
     @JoinColumn(name = "package_id")
     private Packaging packaging;
+
+    @Column(name = "expiration_date")
+    @JsonFormat(shape = STRING, pattern = EXPIRATION_DATE_PATTERN)
+    private LocalDate expirationDate;
+
+    @Column(name = "description")
+    private String description;
 }
