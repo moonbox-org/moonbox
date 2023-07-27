@@ -19,7 +19,7 @@ import static jakarta.persistence.GenerationType.UUID;
 @Table(name = "items")
 public class Item extends BaseEntity {
 
-    private final String EXPIRATION_DATE_PATTERN = "yyyy-MM-dd";
+    private static final String EXPIRATION_DATE_PATTERN = "yyyy-MM-dd";
 
     @Id
     @GeneratedValue(strategy = UUID)
@@ -38,6 +38,10 @@ public class Item extends BaseEntity {
     @ManyToOne(cascade = MERGE)
     @JoinColumn(name = "package_id")
     private Packaging packaging;
+
+    @ManyToOne
+    @JoinColumn(name = "container_type_id")
+    private ContainerType containerType;
 
     @Column(name = "expiration_date")
     @JsonFormat(shape = STRING, pattern = EXPIRATION_DATE_PATTERN)

@@ -26,13 +26,13 @@ public class Category {
 
     @JsonInclude
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    @JsonIdentityReference(alwaysAsId = true) // show only id of Topic
+    @JsonIdentityReference(alwaysAsId = true)
     private List<Category> children;
 
     @JsonInclude
     @ManyToOne
     @JoinColumn(name = "parent_id")
-    @JsonIdentityReference(alwaysAsId = true) // show only id of Topic
+    @JsonIdentityReference(alwaysAsId = true)
     private Category parent;
 
 }

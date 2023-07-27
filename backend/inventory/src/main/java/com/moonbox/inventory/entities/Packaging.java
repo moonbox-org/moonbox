@@ -16,7 +16,7 @@ import static jakarta.persistence.GenerationType.UUID;
 @Table(name = "packages")
 public class Packaging extends BaseEntity {
 
-    private final String EXPIRATION_DATE_PATTERN = "yyyy-MM-dd";
+    private static final String EXPIRATION_DATE_PATTERN = "yyyy-MM-dd";
 
     @Id
     @GeneratedValue(strategy = UUID)

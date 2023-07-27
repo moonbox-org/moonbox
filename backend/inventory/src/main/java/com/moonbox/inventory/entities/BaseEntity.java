@@ -34,6 +34,6 @@ public class BaseEntity {
 
     @LastModifiedBy
     @JsonFormat(shape = STRING)
-    @Column(name = "last_modified_date_by")
+    @Column(name = "last_modified_by")
     private String lastModifiedBy;
 }
