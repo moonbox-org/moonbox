@@ -25,6 +25,9 @@ public class Product extends BaseEntity {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Column(name = "lot_control")
+    private boolean lotControl;
+
     @ManyToMany
     @JoinTable(
             name = "products_categories",

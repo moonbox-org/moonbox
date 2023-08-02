@@ -40,6 +40,10 @@ public class Item extends BaseEntity {
     private Packaging packaging;
 
     @ManyToOne
+    @JoinColumn(name = "lot_id")
+    private Lot lot;
+
+    @ManyToOne
     @JoinColumn(name = "container_type_id")
     private ContainerType containerType;
 
