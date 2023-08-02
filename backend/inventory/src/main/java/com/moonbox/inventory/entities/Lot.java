@@ -1,15 +1,17 @@
 package com.moonbox.inventory.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static jakarta.persistence.GenerationType.UUID;
 
+@Data
+@Entity
+@Table(name = "lots")
 public class Lot extends BaseEntity {
 
     private static final String EXPIRATION_DATE_PATTERN = "yyyy-MM-dd";

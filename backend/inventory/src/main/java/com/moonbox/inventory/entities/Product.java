@@ -42,6 +42,12 @@ public class Product extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "tags_id", referencedColumnName = "id"))
     private Set<ProductTag> tags;
 
+    @Column(name = "hazardous_material")
+    private boolean hazardousMaterial;
+
+    @Column(name = "controlled_substance")
+    private boolean controlledSubstance;
+
     @Column(name = "brand_name")
     private String brandName;
 
@@ -51,6 +57,6 @@ public class Product extends BaseEntity {
     @Column(name = "vendor")
     private String vendor;
 
-    @Column(name = "average_unit_price")
-    private double averageUnitPrice;
+    @Column(name = "unit_price")
+    private double unitPrice;
 }
